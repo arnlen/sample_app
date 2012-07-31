@@ -4,6 +4,16 @@ describe "Authentication" do
 
   subject {page}
 
+  describe "when not signed in" do
+    let(:user){FactoryGirl.create(:user)}
+    before {visit root_path}
+
+    it {should_not have_link('Users', href: users_path)}
+    it {should_not have_link('Profile', href: user_path(user))}
+    it {should_not have_link('Sign out', href: signout_path)}
+    it {should have_link('Sign in', href: signin_path)}
+  end
+
   describe "signin page" do
     before {visit signin_path}
 
@@ -49,6 +59,26 @@ describe "Authentication" do
 
   describe "authorization" do
 
+    describe "for signed-in users" do
+      let(:user){FactoryGirl.create(:user)}
+      before {sign_in user}
+
+      describe "in the Users controller" do
+
+        describe "visiting the new user page" do
+          before {visit new_user_path}
+          it {should_not have_selector('h1', text: "Sign up")}
+        end
+
+        describe "submitting to the create action" do
+          before {post users_path}
+          specify {response.should redirect_to(root_path)}
+        end
+
+      end
+
+    end
+
     describe "for non-signed-in users" do
       let(:user){FactoryGirl.create(:user)}
 
@@ -74,14 +104,20 @@ describe "Authentication" do
       describe "when attempting to visit a protected page" do
         before do
           visit edit_user_path(user)
-          fill_in "Email", with: user.email
-          fill_in "Password", with: user.password
-          click_button "Sign in"
+          sign_in user
         end
 
         describe "after signing in" do
           it "should render the desired protected page" do
             page.should have_selector('title', text: 'Edit user')
+          end
+
+          describe "when signing in again" do
+            before {sign_in user}
+
+            it "should render the default (profile) page" do
+              page.should have_selector('title', text: user.name)
+            end
           end
         end
       end
@@ -115,6 +151,16 @@ describe "Authentication" do
         specify {response.should redirect_to(root_path)}
       end
 
+    end
+
+    describe "as an admin user" do
+      let(:admin){FactoryGirl.create(:admin)}
+      before {sign_in admin}
+
+      describe "trying to DELETE himself via the Users#destroy action" do
+        before {delete user_path(admin)}
+        specify {response.should redirect_to(root_path)}
+      end
     end
 
   end
