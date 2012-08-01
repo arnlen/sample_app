@@ -139,6 +139,10 @@ aside {
       letter-spacing: -1px;
       margin-bottom: 3px;
     }
+    textarea {
+      height: 100px;
+      margin-bottom: 5px;
+    }
   }
 }
 
@@ -186,6 +190,27 @@ input, textarea, select, .uneditable-input {
       border-bottom: 1px solid $grayLighter;
     }
   }
+}
+
+
+/* MICROPOSTS */
+
+.microposts {
+  list-style: none;
+  margin: 10px 0 0 0;
+
+  li {
+    padding: 10px 0;
+    border-top: 1px solid #e8e8e8;
+  }
+}
+
+.content {
+  display: block;
+}
+
+.timestamp {
+  color: $grayLight;
 }
 
 
